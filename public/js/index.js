@@ -13,7 +13,14 @@ var tabela = $('#tabelaVendas').DataTable({
         },
         {
             data: "price_at_sale",
-            sClass: "text-center"
+            sClass: "text-center",
+            render: function (data, type, row) {
+                // Formata o valor como moeda brasileira
+                return parseFloat(data).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                });
+            }
         },
         {
             data: "supplier",
@@ -46,6 +53,23 @@ var tabela = $('#tabelaVendas').DataTable({
             "next": "Próximo",
             "previous": "Anterior"
         },
+    },
+    "footerCallback": function (row, data, start, end, display) {
+        var api = this.api();
+
+        // Calcula a soma do price_at_sale
+        var total = api
+            .column(1, { page: 'current' })
+            .data()
+            .reduce(function (a, b) {
+                return parseFloat(a) + parseFloat(b);
+            }, 0);
+
+        // Atualiza a célula do rodapé com o valor total formatado como moeda brasileira
+        $(api.column(1).footer()).html('Total: ' + total.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+        }));
     },
 });
 document.addEventListener('DOMContentLoaded', async function () {

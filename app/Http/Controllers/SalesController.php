@@ -85,7 +85,7 @@ class SalesController extends Controller
                     products.name,
                     sales_products.price_at_sale,
                     DATE_FORMAT(sales_products.date_sale, "%d/%m/%Y") AS date_sale,
-                    GROUP_CONCAT(DISTINCT suppliers.name SEPARATOR ", ") AS supplier,
+                    IFNULL(GROUP_CONCAT(DISTINCT suppliers.name SEPARATOR ", "), "Sem fornecedor cadastrado para este produto") AS supplier,
                     MAX(
                         CONCAT_WS(", ", 
                             sales_addresses.cep, 
@@ -100,7 +100,7 @@ class SalesController extends Controller
             ')
             ->join('products', 'sales_products.product_id', '=', 'products.id')
             ->join('sales_addresses', 'sales_products.id', '=', 'sales_addresses.sales_product_id')
-            ->join('suppliers', 'products.id', '=', 'suppliers.product_id')
+            ->leftJoin('suppliers', 'products.id', '=', 'suppliers.product_id')
             ->groupBy('sales_products.id')
             ->get();
 
